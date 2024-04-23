@@ -1,6 +1,9 @@
 # r.avaflow Container
 This repository contains a MWE to build a apptainer container for the ![r.avaflow](https://www.landslidemodels.org/r.avaflow/) solver.
-The r.avaflow source code or `ravaflow` folder has been downloaded from: https://www.landslidemodels.org/r.avaflow/software/r.avaflow3G_20230411.zip and is licensed under GPLv3.
+The r.avaflow source code or `r.avaflow` folder has been downloaded from: https://www.landslidemodels.org/r.avaflow/software/r.avaflow3G_20230411.zip and is licensed under GPLv3.
+The tests have been taken from:
+- ![Cascadia Generic Landscape](https://www.landslidemodels.org/r.avaflow/data/Cascadia_G20230414.zip)
+- ![Acheron Rock Avalanche](https://www.landslidemodels.org/r.avaflow/data/Acheron_G20230122.zip)
 
 ## How to Use
 0. Install Apptainer using the ![Installation Instructions](https://apptainer.org/docs/admin/main/installation.html#install-from-pre-built-packages). For a compute cluster with apptainer already installed, load the Apptainer module instead.
