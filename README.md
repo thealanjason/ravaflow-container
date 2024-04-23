@@ -1,5 +1,6 @@
 # r.avaflow Container
 This repository contains a MWE to build a apptainer container for the ![r.avaflow](https://www.landslidemodels.org/r.avaflow/) solver.
+The r.avaflow source code or `ravaflow` folder has been downloaded from: https://www.landslidemodels.org/r.avaflow/software/r.avaflow3G_20230411.zip and is licensed under GPLv3.
 
 ## How to Use
 0. Install Apptainer using the ![Installation Instructions](https://apptainer.org/docs/admin/main/installation.html#install-from-pre-built-packages). For a compute cluster with apptainer already installed, load the Apptainer module instead.
@@ -19,6 +20,6 @@ This repository contains a MWE to build a apptainer container for the ![r.avaflo
 
 ## Reproducibility
 This container is currently built and tested on Linux for the following architectures:
-    - [x] x86_64
-    - [ ] aarch64
+- [x] x86_64
+- [ ] aarch64
 
