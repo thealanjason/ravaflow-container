@@ -1,0 +1,11 @@
+Bootstrap: localimage
+From: ravaflow-deps.sif
+
+%environment
+
+%files
+    r.avaflow
+
+%post
+    grass --tmp-location XY --exec g.extension -s extension=r.avaflow url=/r.avaflow/
+    

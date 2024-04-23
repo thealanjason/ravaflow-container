@@ -1,0 +1,40 @@
+Bootstrap: localimage
+From: grass-deps.sif
+
+%post
+    ## https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu#Packaging_of_GRASS
+    git clone https://github.com/OSGeo/grass.git grass-8.3.latest.git
+    cd grass-8.3.latest.git/
+    git checkout releasebranch_8_3
+
+    # "configure" source code for local machine (checks for CPU type etc):
+    MYCFLAGS='-O2 -fPIC -fno-common -fexceptions -std=gnu99 -fstack-protector -m64'
+    #MYCXXFLAGS=''
+    MYLDFLAGS='-Wl,--no-undefined -Wl,-z,now'
+
+    LDFLAGS="$MYLDFLAGS" CFLAGS="$MYCFLAGS" CXXFLAGS="$MYCXXFLAGS" ./configure \
+        --with-cxx \
+        --enable-largefile \
+        --with-proj --with-proj-share=/usr/share/proj \
+        --with-gdal=/usr/bin/gdal-config \
+        --with-python \
+        --with-geos \
+        --with-sqlite \
+        --with-nls \
+        --with-zstd \
+        --with-pdal \
+        --with-cairo --with-cairo-ldflags=-lfontconfig \
+        --with-freetype=yes --with-freetype-includes="/usr/include/freetype2/" \
+        --with-wxwidgets \
+        --with-fftw \
+        --with-motif \
+        --with-opengl-libs=/usr/include/GL \
+        --with-postgres=yes --with-postgres-includes="/usr/include/postgresql" \
+        --without-netcdf \
+        --without-mysql \
+        --without-odbc \
+        --without-openmp 
+
+    make -j
+
+    make install

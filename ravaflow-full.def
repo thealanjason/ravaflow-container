@@ -1,0 +1,133 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%files
+    r.avaflow
+
+%post
+    ### Step 1: Setup Ubuntu Basic
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y software-properties-common git
+    # Set your desired timezone; for example, 'Etc/UTC' or 'America/New_York'
+    ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+    dpkg-reconfigure -f noninteractive tzdata
+
+    ### Step 2: Install GRASS Dependencies
+    ## Below Instructions are taken from 
+    ## https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu#Packaging_of_GRASS
+    ## 1. Geospatial Dependencies
+    # be sure to have an updated system
+    apt update && apt upgrade -y
+
+    # install PROJ
+    apt install libproj-dev proj-data proj-bin unzip -y
+
+    # optionally, install (selected) datum grid files
+    apt-get install proj-data
+
+    # install GEOS
+    apt install libgeos-dev -y
+
+    # install GDAL
+    apt install libgdal-dev python3-gdal gdal-bin -y
+
+    # install PDAL (optional)
+    apt install libpdal-dev pdal libpdal-plugin-python -y
+
+    # recommended to give Python3 precedence over Python2 (which is end-of-life since 2019)
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
+    ## 2. Compilation Dependencies
+    # Basic Dependencies
+    apt-get install \
+        build-essential \
+        flex make bison gcc libgcc1 g++ ccache \
+        python3 python3-dev \
+        python3-opengl python3-wxgtk4.0 \
+        python3-dateutil libgsl-dev python3-numpy \
+        wx3.0-headers wx-common libwxgtk3.0-gtk3-dev \
+        libwxbase3.0-dev   \
+        libncurses5-dev \
+        libbz2-dev \
+        zlib1g-dev gettext \
+        libtiff5-dev libpnglite-dev \
+        libcairo2 libcairo2-dev \
+        sqlite3 libsqlite3-dev \
+        libpq-dev \
+        libreadline6-dev libfreetype6-dev \
+        libfftw3-3 libfftw3-dev \
+        libboost-thread-dev libboost-program-options-dev  libpdal-dev\
+        subversion libzstd-dev \
+        checkinstall \
+        libglu1-mesa-dev libxmu-dev \
+        ghostscript wget -y
+
+    # NVIZ Dependencies
+    apt-get install \
+        ffmpeg libavutil-dev ffmpeg2theora \
+        libffmpegthumbnailer-dev \
+        libavcodec-dev \
+        libxmu-dev \
+        libavformat-dev libswscale-dev -y
+
+    ### Step 3: Install GRASS
+    ## https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu#Packaging_of_GRASS
+    git clone https://github.com/OSGeo/grass.git grass-8.3.latest.git
+    cd grass-8.3.latest.git/
+    git checkout releasebranch_8_3
+
+    # "configure" source code for local machine (checks for CPU type etc):
+    MYCFLAGS='-O2 -fPIC -fno-common -fexceptions -std=gnu99 -fstack-protector -m64'
+    #MYCXXFLAGS=''
+    MYLDFLAGS='-Wl,--no-undefined -Wl,-z,now'
+
+    LDFLAGS="$MYLDFLAGS" CFLAGS="$MYCFLAGS" CXXFLAGS="$MYCXXFLAGS" ./configure \
+        --with-cxx \
+        --enable-largefile \
+        --with-proj --with-proj-share=/usr/share/proj \
+        --with-gdal=/usr/bin/gdal-config \
+        --with-python \
+        --with-geos \
+        --with-sqlite \
+        --with-nls \
+        --with-zstd \
+        --with-pdal \
+        --with-cairo --with-cairo-ldflags=-lfontconfig \
+        --with-freetype=yes --with-freetype-includes="/usr/include/freetype2/" \
+        --with-wxwidgets \
+        --with-fftw \
+        --with-motif \
+        --with-opengl-libs=/usr/include/GL \
+        --with-postgres=yes --with-postgres-includes="/usr/include/postgresql" \
+        --without-netcdf \
+        --without-mysql \
+        --without-odbc \
+        --without-openmp 
+
+    make -j
+
+    make install
+
+    ### Step 4. Install r.avaflow Dependencies
+    #Making sure that Python 3 is used
+    apt install python3-pip -y
+    echo "alias python=python3" >> ~/.bash_aliases
+    . ~/.bash_aliases
+
+    #Installing pillow
+    python3 -m pip install --upgrade pillow
+
+    #Installing R statistical software
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+
+    apt install r-base r-base-core -y
+
+    #Installing necessary additional R packages
+    echo 'install.packages(c("stats","codetools","Rcpp","terra","lattice","sp","raster","ROCR"), lib="/usr/lib/R/library/", repos="https://cloud.r-project.org/" )' > install.packages.R
+    R CMD BATCH install.packages.R
+
+    ### Step 5. Install r.avaflow
+    grass --tmp-location XY --exec g.extension -s extension=r.avaflow url=/r.avaflow/
+    

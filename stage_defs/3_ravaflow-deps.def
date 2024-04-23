@@ -1,0 +1,21 @@
+Bootstrap: localimage
+From: grass.sif
+
+%post
+    #Making sure that Python 3 is used
+    apt install python3-pip -y
+    echo "alias python=python3" >> ~/.bash_aliases
+    . ~/.bash_aliases
+
+    #Installing pillow
+    python3 -m pip install --upgrade pillow
+
+    #Installing R statistical software
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+
+    apt install r-base r-base-core -y
+
+    #Installing necessary additional R packages
+    echo 'install.packages(c("stats","codetools","Rcpp","terra","lattice","sp","raster","ROCR"), lib="/usr/lib/R/library/", repos="https://cloud.r-project.org/" )' > install.packages.R
+    R CMD BATCH install.packages.R
